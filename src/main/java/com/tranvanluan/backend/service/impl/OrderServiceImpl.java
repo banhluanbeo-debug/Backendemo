@@ -156,7 +156,6 @@ public class OrderServiceImpl implements OrderService {
                     .createdAt(LocalDateTime.now())
                     .updatedAt(LocalDateTime.now())
                     .build();
-
             ss.setOrderDetail(detail);
             details.add(detail);
         }
