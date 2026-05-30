@@ -51,7 +51,9 @@ public class VNPayUtil {
         params.put("vnp_ReturnUrl", returnUrl);
         params.put("vnp_IpAddr", ipAddr != null ? ipAddr : "127.0.0.1");
         params.put("vnp_CreateDate", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
-
+        System.out.println("TMN = " + tmnCode);
+        System.out.println("SECRET = " + hashSecret);
+        System.out.println("RETURN_URL = " + returnUrl);
         // Build raw hash string (params đã sort vì dùng TreeMap)
         String rawHash = buildRawString(params);
         String secureHash = hmacSHA512(hashSecret, rawHash);
