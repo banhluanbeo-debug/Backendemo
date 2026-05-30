@@ -57,7 +57,11 @@ public class VNPayUtil {
         // Build raw hash string (params đã sort vì dùng TreeMap)
         String rawHash = buildRawString(params);
         String secureHash = hmacSHA512(hashSecret, rawHash);
-
+        System.out.println("===== VNPAY DEBUG =====");
+        System.out.println("TMN = [" + tmnCode + "]");
+        System.out.println("SECRET LENGTH = " + (hashSecret == null ? 0 : hashSecret.length()));
+        System.out.println("RETURN_URL = [" + returnUrl + "]");
+        System.out.println("=======================");
         // Build query string (có encode)
         String queryString = buildQueryString(params);
         System.out.println("RAW HASH = " + rawHash);
