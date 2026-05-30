@@ -202,11 +202,14 @@ public class ShowtimeServiceImpl implements ShowtimeService {
         validateShowtime(showtime);
 
         boolean roomChanged = !existing.getRoom().getId().equals(showtime.getRoom().getId());
-        if (roomChanged) {
+        boolean timeChanged = !existing.getShowDate().equals(showtime.getShowDate()) || !existing.getShowTime().equals(showtime.getShowTime());
+        boolean movieChanged = !existing.getMovie().getId().equals(showtime.getMovie().getId());
+
+        if (roomChanged || timeChanged || movieChanged) {
             boolean hasBookedOrHeld = showtimeSeatRepository.existsByShowtimeIdAndStatus(id, SeatStatus.BOOKED)
                     || showtimeSeatRepository.existsByShowtimeIdAndStatus(id, SeatStatus.HOLD);
             if (hasBookedOrHeld) {
-                throw new IllegalArgumentException("Không thể đổi phòng cho suất chiếu đã có người chọn hoặc đặt vé!");
+                throw new IllegalArgumentException("Không thể thay đổi phòng, phim, hoặc thời gian cho suất chiếu đã có người chọn hoặc đặt vé!");
             }
         }
 
