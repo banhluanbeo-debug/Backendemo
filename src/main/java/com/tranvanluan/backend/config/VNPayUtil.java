@@ -42,7 +42,7 @@ public class VNPayUtil {
         params.put("vnp_Version", "2.1.1");
         params.put("vnp_Command", "pay");
         params.put("vnp_TmnCode", tmnCode);
-        params.put("vnp_Amount", String.valueOf(amount * 100)); // VNPay yêu cầu nhân 100
+        params.put("vnp_Amount", Long.toString(amount * 100L));
         params.put("vnp_CurrCode", "VND");
         params.put("vnp_TxnRef", orderId);
         params.put("vnp_OrderInfo", "Thanh toan don hang " + orderId);
