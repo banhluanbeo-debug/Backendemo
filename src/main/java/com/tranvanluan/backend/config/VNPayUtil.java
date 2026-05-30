@@ -8,6 +8,8 @@ import javax.crypto.spec.SecretKeySpec;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -50,11 +52,12 @@ public class VNPayUtil {
         params.put("vnp_Locale", "vn");
         params.put("vnp_ReturnUrl", returnUrl);
         params.put("vnp_IpAddr", ipAddr != null ? ipAddr : "127.0.0.1");
-        params.put("vnp_CreateDate", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        params.put("vnp_CreateDate", now.format(fmt));
         params.put(
                 "vnp_ExpireDate",
-                LocalDateTime.now().plusMinutes(15)
-                        .format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
+                now.plusMinutes(15).format(fmt));
         System.out.println("TMN = " + tmnCode);
         System.out.println("SECRET = " + hashSecret);
         System.out.println("RETURN_URL = " + returnUrl);
