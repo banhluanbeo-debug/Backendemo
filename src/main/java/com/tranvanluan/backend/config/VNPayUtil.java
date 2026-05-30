@@ -108,7 +108,8 @@ public class VNPayUtil {
     // ================================================================
 
     /**
-     * Build raw string để sign: key=value&key=value (không encode, đã sort)
+     * Build raw string để sign: key=URLEncode(value)&key=URLEncode(value) (đã sort)
+     * VNPay yêu cầu hash tính trên chuỗi có URL-encoded values
      */
     private String buildRawString(Map<String, String> params) {
         StringBuilder sb = new StringBuilder();
@@ -122,7 +123,7 @@ public class VNPayUtil {
 
                 sb.append(entry.getKey())
                         .append("=")
-                        .append(entry.getValue());
+                        .append(URLEncoder.encode(entry.getValue(), StandardCharsets.US_ASCII));
             }
         }
 
