@@ -58,7 +58,8 @@ public class VNPayUtil {
 
         // Build query string (có encode)
         String queryString = buildQueryString(params);
-
+        System.out.println("RAW HASH = " + rawHash);
+        System.out.println("HASH = " + secureHash);
         return payUrl + "?" + queryString + "&vnp_SecureHash=" + secureHash;
     }
 
@@ -68,7 +69,8 @@ public class VNPayUtil {
 
     public boolean verifyReturnUrl(Map<String, String> params) {
         String receivedHash = params.get("vnp_SecureHash");
-        if (receivedHash == null) return false;
+        if (receivedHash == null)
+            return false;
 
         // Tạo map mới bỏ hash fields
         Map<String, String> checkParams = new TreeMap<>(params);
@@ -92,7 +94,8 @@ public class VNPayUtil {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> entry : params.entrySet()) {
             if (entry.getValue() != null && !entry.getValue().isEmpty()) {
-                if (sb.length() > 0) sb.append("&");
+                if (sb.length() > 0)
+                    sb.append("&");
                 sb.append(entry.getKey()).append("=").append(entry.getValue());
             }
         }
@@ -106,9 +109,10 @@ public class VNPayUtil {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> entry : params.entrySet()) {
             if (entry.getValue() != null && !entry.getValue().isEmpty()) {
-                if (sb.length() > 0) sb.append("&");
+                if (sb.length() > 0)
+                    sb.append("&");
                 sb.append(entry.getKey()).append("=")
-                  .append(URLEncoder.encode(entry.getValue(), StandardCharsets.US_ASCII));
+                        .append(URLEncoder.encode(entry.getValue(), StandardCharsets.US_ASCII));
             }
         }
         return sb.toString();
