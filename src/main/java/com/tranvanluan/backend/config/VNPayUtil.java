@@ -60,7 +60,10 @@ public class VNPayUtil {
         String queryString = buildQueryString(params);
         System.out.println("RAW HASH = " + rawHash);
         System.out.println("HASH = " + secureHash);
-        return payUrl + "?" + queryString + "&vnp_SecureHash=" + secureHash;
+        return payUrl + "?"
+                + queryString
+                + "&vnp_SecureHashType=HmacSHA512"
+                + "&vnp_SecureHash=" + secureHash;
     }
 
     // ================================================================
