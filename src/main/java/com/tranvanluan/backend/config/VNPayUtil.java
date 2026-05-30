@@ -61,6 +61,10 @@ public class VNPayUtil {
         System.out.println("TMN = " + tmnCode);
         System.out.println("SECRET = " + hashSecret);
         System.out.println("RETURN_URL = " + returnUrl);
+        System.out.println("vnp_CreateDate = " + now.format(fmt));
+        System.out.println("vnp_ExpireDate = " + now.plusMinutes(15).format(fmt));
+        System.out.println("Server UTC time = " + ZonedDateTime.now(ZoneId.of("UTC")).format(fmt));
+        System.out.println("Vietnam time    = " + now.format(fmt));
         // Build raw hash string (params đã sort vì dùng TreeMap)
         String rawHash = buildRawString(params);
         String secureHash = hmacSHA512(hashSecret, rawHash);
