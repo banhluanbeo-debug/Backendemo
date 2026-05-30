@@ -39,8 +39,8 @@ public class VNPayUtil {
     public String buildPaymentUrl(long amount, String orderId, String ipAddr) {
         Map<String, String> params = new TreeMap<>(); // TreeMap tự sort theo key
 
-        params.put("vnp_Version", "2.1.0");
-        params.put("vnp_Command", "pay");
+        params.put("vnp_Version", "2.1.1");
+                params.put("vnp_Command", "pay");
         params.put("vnp_TmnCode", tmnCode);
         params.put("vnp_Amount", String.valueOf(amount * 100)); // VNPay yêu cầu nhân 100
         params.put("vnp_CurrCode", "VND");
