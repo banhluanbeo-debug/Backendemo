@@ -40,7 +40,7 @@ public class VNPayUtil {
         Map<String, String> params = new TreeMap<>(); // TreeMap tự sort theo key
 
         params.put("vnp_Version", "2.1.1");
-                params.put("vnp_Command", "pay");
+        params.put("vnp_Command", "pay");
         params.put("vnp_TmnCode", tmnCode);
         params.put("vnp_Amount", String.valueOf(amount * 100)); // VNPay yêu cầu nhân 100
         params.put("vnp_CurrCode", "VND");
@@ -51,6 +51,10 @@ public class VNPayUtil {
         params.put("vnp_ReturnUrl", returnUrl);
         params.put("vnp_IpAddr", ipAddr != null ? ipAddr : "127.0.0.1");
         params.put("vnp_CreateDate", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
+        params.put(
+                "vnp_ExpireDate",
+                LocalDateTime.now().plusMinutes(15)
+                        .format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
         System.out.println("TMN = " + tmnCode);
         System.out.println("SECRET = " + hashSecret);
         System.out.println("RETURN_URL = " + returnUrl);
@@ -101,13 +105,20 @@ public class VNPayUtil {
      */
     private String buildRawString(Map<String, String> params) {
         StringBuilder sb = new StringBuilder();
+
         for (Map.Entry<String, String> entry : params.entrySet()) {
             if (entry.getValue() != null && !entry.getValue().isEmpty()) {
-                if (sb.length() > 0)
+
+                if (sb.length() > 0) {
                     sb.append("&");
-                sb.append(entry.getKey()).append("=").append(entry.getValue());
+                }
+
+                sb.append(entry.getKey())
+                        .append("=")
+                        .append(entry.getValue());
             }
         }
+
         return sb.toString();
     }
 
@@ -116,14 +127,19 @@ public class VNPayUtil {
      */
     private String buildQueryString(Map<String, String> params) {
         StringBuilder sb = new StringBuilder();
+
         for (Map.Entry<String, String> entry : params.entrySet()) {
             if (entry.getValue() != null && !entry.getValue().isEmpty()) {
+
                 if (sb.length() > 0)
                     sb.append("&");
-                sb.append(entry.getKey()).append("=")
-                        .append(URLEncoder.encode(entry.getValue(), StandardCharsets.US_ASCII));
+
+                sb.append(entry.getKey())
+                        .append("=")
+                        .append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8));
             }
         }
+
         return sb.toString();
     }
 
