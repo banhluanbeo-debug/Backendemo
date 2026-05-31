@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "banners")
@@ -25,6 +26,7 @@ public class Banner {
 
     @Column(name = "is_active")
     @Builder.Default
+    @JsonProperty("isActive")
     private boolean isActive = true;
 
     private LocalDateTime createdAt;
