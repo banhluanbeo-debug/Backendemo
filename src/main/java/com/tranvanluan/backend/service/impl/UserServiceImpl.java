@@ -5,6 +5,7 @@
     import com.tranvanluan.backend.repository.PasswordResetOtpRepository;
     import com.tranvanluan.backend.repository.UserRepository;
     import com.tranvanluan.backend.service.UserService;
+    import com.tranvanluan.backend.service.EmailService;
     import lombok.RequiredArgsConstructor;
     import lombok.extern.slf4j.Slf4j;
 
@@ -35,6 +36,7 @@
         private final UserRepository userRepository;
         private final PasswordResetOtpRepository otpRepository;
         private final PasswordEncoder passwordEncoder;
+        private final EmailService emailService;
 
         @Override
         public List<User> getAll() {
@@ -191,6 +193,9 @@
             log.info("MÃ OTP KHÔI PHỤC MẬT KHẨU CHO EMAIL {}: {}", email, otp);
             log.info("Mã này có hiệu lực trong 5 phút.");
             log.info("==============================================");
+
+            // Send actual email
+            emailService.sendOtpEmail(email, otp);
         }
 
         @Override
