@@ -39,7 +39,7 @@ public class EmailService {
             log.info("Đã gửi email chứa OTP đến {}", toEmail);
         } catch (Exception e) {
             log.error("Lỗi khi gửi email đến {}: {}", toEmail, e.getMessage());
-            throw new RuntimeException("Không thể gửi email lúc này, vui lòng thử lại sau.");
+            throw new RuntimeException("Lỗi gửi mail: " + e.getMessage());
         }
     }
 }
