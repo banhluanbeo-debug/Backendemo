@@ -7,6 +7,8 @@ import com.tranvanluan.backend.entity.User;
 import com.tranvanluan.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -35,5 +37,29 @@ public class AuthController {
     @PostMapping("/google")
     public User loginWithGoogle(@RequestBody GoogleLoginRequest request) {
         return userService.loginWithGoogleToken(request.getToken());
+    }
+
+    @PostMapping("/forgot-password/send-otp")
+    public ResponseEntity<?> sendPasswordResetOtp(@RequestBody Map<String, String> request) {
+        try {
+            userService.sendPasswordResetOtp(request.get("email"));
+            return ResponseEntity.ok(Map.of("message", "Mã OTP đã được gửi."));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/forgot-password/reset")
+    public ResponseEntity<?> resetPasswordWithOtp(@RequestBody Map<String, String> request) {
+        try {
+            userService.resetPasswordWithOtp(
+                    request.get("email"),
+                    request.get("otp"),
+                    request.get("newPassword")
+            );
+            return ResponseEntity.ok(Map.of("message", "Đổi mật khẩu thành công."));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
     }
 }

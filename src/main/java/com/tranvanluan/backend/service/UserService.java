@@ -21,4 +21,8 @@ public interface UserService {
     User loginWithGoogle(String email, String name, String providerId);
 
     User loginWithGoogleToken(String token);
+
+    void sendPasswordResetOtp(String email);
+
+    void resetPasswordWithOtp(String email, String otp, String newPassword);
 }

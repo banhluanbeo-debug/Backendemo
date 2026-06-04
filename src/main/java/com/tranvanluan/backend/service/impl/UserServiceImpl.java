@@ -1,12 +1,16 @@
     package com.tranvanluan.backend.service.impl;
 
+    import com.tranvanluan.backend.entity.PasswordResetOtp;
     import com.tranvanluan.backend.entity.User;
+    import com.tranvanluan.backend.repository.PasswordResetOtpRepository;
     import com.tranvanluan.backend.repository.UserRepository;
     import com.tranvanluan.backend.service.UserService;
     import lombok.RequiredArgsConstructor;
+    import lombok.extern.slf4j.Slf4j;
 
     import org.springframework.security.crypto.password.PasswordEncoder;
     import org.springframework.stereotype.Service;
+    import org.springframework.transaction.annotation.Transactional;
 
     import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
     import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
@@ -17,13 +21,19 @@
 
     import java.util.List;
     import java.util.NoSuchElementException;
+    import java.util.Optional;
+    import java.util.Random;
+    import java.time.LocalDateTime;
+
     import com.tranvanluan.backend.entity.AuthProvider;
 
     @Service
     @RequiredArgsConstructor
+    @Slf4j
     public class UserServiceImpl implements UserService {
 
         private final UserRepository userRepository;
+        private final PasswordResetOtpRepository otpRepository;
         private final PasswordEncoder passwordEncoder;
 
         @Override
@@ -150,5 +160,60 @@
 
             } catch (Exception e) {
                 throw new RuntimeException("Google login failed: " + e.getMessage());            }
+        }
+
+        @Override
+        @Transactional
+        public void sendPasswordResetOtp(String email) {
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("Email chưa được đăng ký trong hệ thống."));
+
+            if (user.getProvider() == AuthProvider.GOOGLE) {
+                throw new RuntimeException("Tài khoản này được đăng nhập bằng Google. Vui lòng sử dụng đăng nhập Google.");
+            }
+
+            // Generate 6-digit OTP
+            String otp = String.format("%06d", new Random().nextInt(1000000));
+            
+            // Delete old OTP if exists
+            otpRepository.deleteByEmail(email);
+
+            // Save new OTP
+            PasswordResetOtp resetOtp = PasswordResetOtp.builder()
+                    .email(email)
+                    .otp(otp)
+                    .expiryTime(LocalDateTime.now().plusMinutes(5))
+                    .build();
+            otpRepository.save(resetOtp);
+
+            // Print to console for now
+            log.info("==============================================");
+            log.info("MÃ OTP KHÔI PHỤC MẬT KHẨU CHO EMAIL {}: {}", email, otp);
+            log.info("Mã này có hiệu lực trong 5 phút.");
+            log.info("==============================================");
+        }
+
+        @Override
+        @Transactional
+        public void resetPasswordWithOtp(String email, String otp, String newPassword) {
+            PasswordResetOtp resetOtp = otpRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy yêu cầu khôi phục mật khẩu cho email này."));
+
+            if (resetOtp.getExpiryTime().isBefore(LocalDateTime.now())) {
+                otpRepository.deleteByEmail(email);
+                throw new RuntimeException("Mã OTP đã hết hạn, vui lòng yêu cầu mã mới.");
+            }
+
+            if (!resetOtp.getOtp().equals(otp)) {
+                throw new RuntimeException("Mã OTP không chính xác.");
+            }
+
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng."));
+
+            user.setPassword(passwordEncoder.encode(newPassword));
+            userRepository.save(user);
+
+            otpRepository.deleteByEmail(email);
         }
     }
