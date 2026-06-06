@@ -30,7 +30,6 @@ public class Contact {
     @Column(nullable = false, length = 2000)
     private String message;
 
-    // Trạng thái xử lý: NEW, IN_PROGRESS, RESOLVED
     @Column(nullable = false)
     @Builder.Default
     private String status = "NEW";

@@ -16,7 +16,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> {
-                }) // 👈 QUAN TRỌNG
+                }) 
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll());
 

@@ -100,11 +100,10 @@
                 throw new RuntimeException("Tài khoản đã bị khoá");
             }
 
-            // Tự động sửa lỗi mật khẩu cũ chưa được mã hoá (Lazy Migration)
             if (!user.getPassword().startsWith("$2a$")) {
                 if (user.getPassword().equals(password)) {
                     user.setPassword(passwordEncoder.encode(password));
-                    userRepository.save(user); // Cập nhật lại mật khẩu chuẩn BCrypt vào DB
+                    userRepository.save(user); 
                 } else {
                     throw new RuntimeException("Wrong password");
                 }

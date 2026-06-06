@@ -33,7 +33,7 @@ public class OrderHistory {
     private String status;
 
     @Column(length = 1000)
-    private String seatCodes; // vd: "A1, A2, B3"
+    private String seatCodes;
 
     private Double foodTotal = 0.0;
     private Double discountAmount = 0.0;

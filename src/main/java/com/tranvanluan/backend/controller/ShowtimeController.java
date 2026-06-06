@@ -23,7 +23,7 @@ public class ShowtimeController {
 
     private final ShowtimeService showtimeService;
     private final ShowtimeMapper showtimeMapper;
-    private final MovieRepository movieRepository; // thêm
+    private final MovieRepository movieRepository;
     private final RoomRepository roomRepository;
 
     @GetMapping

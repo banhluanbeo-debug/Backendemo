@@ -28,9 +28,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderHistoryRepository orderHistoryRepository;
     private final VoucherService voucherService;
 
-    // ----------------------------------------------------------------
-    // Các method cũ giữ nguyên
-    // ----------------------------------------------------------------
+   
 
     @Override
     public List<Order> getAll() {
@@ -50,17 +48,14 @@ public class OrderServiceImpl implements OrderService {
 
         List<com.tranvanluan.backend.dto.OrderResponseDTO> results = new ArrayList<>();
 
-        // Add active orders
         for (Order o : activeOrders) {
             results.add(com.tranvanluan.backend.service.mapper.OrderMapper.toDTO(o));
         }
 
-        // Add history/archived orders
         for (OrderHistory h : historyOrders) {
             results.add(com.tranvanluan.backend.service.mapper.OrderMapper.toDTO(h));
         }
 
-        // Sort descending by createdAt or id
         results.sort((a, b) -> {
             if (b.getCreatedAt() != null && a.getCreatedAt() != null) {
                 return b.getCreatedAt().compareTo(a.getCreatedAt());
@@ -92,9 +87,7 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.save(existing);
     }
 
-    // ----------------------------------------------------------------
-    // createOrder — thay thế hoàn toàn, dùng ShowtimeSeat + Lock
-    // ----------------------------------------------------------------
+    
 
     @Override
     @Transactional
@@ -105,11 +98,9 @@ public class OrderServiceImpl implements OrderService {
         Showtime showtime = showtimeRepository.findById(request.getShowtimeId())
                 .orElseThrow(() -> new RuntimeException("Showtime not found"));
 
-        // Tính foodTotal và discountAmount từ request (frontend đã tính sẵn)
         double foodTotal = request.getFoodTotal() != null ? request.getFoodTotal() : 0.0;
         double discountAmount = request.getDiscountAmount() != null ? request.getDiscountAmount() : 0.0;
 
-        // Tạo Order trước (chưa có details, chưa save)
         Order order = Order.builder()
                 .user(user)
                 .status("PENDING")
@@ -127,13 +118,11 @@ public class OrderServiceImpl implements OrderService {
 
         for (Long seatId : request.getSeatIds()) {
 
-            // 1. Lock row ShowtimeSeat lại — thread khác phải đợi transaction này xong
             ShowtimeSeat ss = showtimeSeatRepository
                     .findByShowtimeIdAndSeatIdWithLock(showtime.getId(), seatId)
                     .orElseThrow(() -> new RuntimeException(
                             "Không tìm thấy ghế " + seatId + " trong suất chiếu này"));
 
-            // 2. Sau khi lock rồi mới check — lúc này data đã chính xác
             boolean isAvailable = ss.getStatus() == SeatStatus.AVAILABLE;
             boolean isExpiredHold = ss.isHoldExpired();
 
@@ -142,13 +131,11 @@ public class OrderServiceImpl implements OrderService {
                         "Ghế " + ss.getSeat().getCode() + " đang được giữ hoặc đã được đặt");
             }
 
-            // 3. Giữ ghế (HOLD) — thanh toán xong sẽ chuyển sang BOOKED
             ss.setStatus(SeatStatus.HOLD);
             ss.setHoldUntil(LocalDateTime.now().plusMinutes(2));
             ss.setUser(user);
             showtimeSeatRepository.save(ss);
 
-            // 4. Tạo OrderDetail trỏ vào ShowtimeSeat
             OrderDetail detail = OrderDetail.builder()
                     .order(order)
                     .showtimeSeat(ss)
@@ -159,7 +146,6 @@ public class OrderServiceImpl implements OrderService {
             details.add(detail);
         }
 
-        // Tổng = tiền vé + đồ ăn - voucher
         double ticketTotal = details.stream().mapToDouble(OrderDetail::getPrice).sum();
         double grandTotal = ticketTotal + foodTotal - discountAmount;
         order.setTotalAmount(grandTotal);
@@ -172,9 +158,7 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    // ----------------------------------------------------------------
-    // confirmOrder — gọi sau khi thanh toán thành công
-    // ----------------------------------------------------------------
+   
 
     @Transactional
     public Order confirmOrder(Long orderId, Long userId) {
@@ -207,13 +191,11 @@ public class OrderServiceImpl implements OrderService {
         order.setUpdatedAt(LocalDateTime.now());
         Order saved = orderRepository.save(order);
 
-        // Đánh dấu voucher USED — chỉ sau khi thanh toán thành công
         if (order.getVoucherCode() != null && !order.getVoucherCode().isBlank()) {
             try {
                 voucherService.markUsed(order.getVoucherCode());
             } catch (Exception e) {
-                // Log nhưng không fail toàn bộ transaction
-                // Voucher có thể đã USED hoặc không tồn tại
+             
                 System.err.println("Không thể đánh dấu voucher USED: " + e.getMessage());
             }
         }

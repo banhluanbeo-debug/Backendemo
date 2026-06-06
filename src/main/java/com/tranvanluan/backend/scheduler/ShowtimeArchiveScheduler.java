@@ -55,7 +55,6 @@ public class ShowtimeArchiveScheduler {
 
                 if (!ended) continue;
 
-                // Thu thập userId để tặng reward sau khi archive xong
                 Set<Long> archivedUserIds = new HashSet<>();
 
                 try {
@@ -67,10 +66,9 @@ public class ShowtimeArchiveScheduler {
                 } catch (Exception e) {
                     pw.println("    FAILED to archive showtime id=" + showtime.getId() + " error: " + e.getMessage());
                     e.printStackTrace(pw);
-                    continue; // bỏ qua reward nếu archive thất bại
+                    continue; 
                 }
 
-                // Tặng reward sau khi transaction archive đã commit
                 for (Long userId : archivedUserIds) {
                     try {
                         rewardService.checkAndGrantRewards(userId);
@@ -91,7 +89,6 @@ public class ShowtimeArchiveScheduler {
 
         List<Order> orders = orderRepository.findByShowtimeId(showtime.getId());
 
-        // 1. Lưu OrderHistory trước
         for (Order order : orders) {
             String seatCodes = order.getOrderDetails().stream()
                     .map(od -> od.getShowtimeSeat() != null && od.getShowtimeSeat().getSeat() != null
@@ -111,7 +108,6 @@ public class ShowtimeArchiveScheduler {
                     .paymentMethod(order.getPaymentMethod())
                     .status(order.getStatus())
                     .seatCodes(seatCodes)
-                    // Copy food & voucher data
                     .foodTotal(order.getFoodTotal())
                     .discountAmount(order.getDiscountAmount())
                     .voucherCode(order.getVoucherCode())
@@ -121,7 +117,6 @@ public class ShowtimeArchiveScheduler {
 
             orderHistoryRepository.save(history);
 
-            // Ghi nhớ userId để check reward sau khi archive xong
             if ("PAID".equalsIgnoreCase(order.getStatus())) {
                 archivedUserIds.add(order.getUser().getId());
             }
@@ -129,23 +124,18 @@ public class ShowtimeArchiveScheduler {
             log.info("Archived order history for order id={} seats='{}'", order.getId(), seatCodes);
         }
 
-        // Đảm bảo history đã ghi xuống DB
         orderHistoryRepository.flush();
 
-        // 2. Clear EntityManager để ngắt kết nối toàn bộ thực thể
         entityManager.clear();
 
-        // 3. Xóa tuần tự qua JPQL @Modifying
         List<Long> orderIds = orders.stream().map(Order::getId).collect(Collectors.toList());
         if (!orderIds.isEmpty()) {
             orderDetailRepository.deleteByOrderIdIn(orderIds);
             orderRepository.deleteByIdIn(orderIds);
         }
 
-        // 4. Xóa ShowtimeSeats của showtime
         showtimeSeatRepository.deleteByShowtimeId(showtime.getId());
 
-        // 5. Xóa Showtime
         showtimeRepository.deleteByShowtimeId(showtime.getId());
 
         log.info("Showtime id={} fully removed from DB via bulk delete.", showtime.getId());

@@ -13,12 +13,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-/**
- * Utility class xử lý tất cả logic thô của VNPay:
- * - HMAC SHA512 hashing
- * - Sort & encode params
- * - Build payment URL
- */
+
 @Component
 public class VNPayUtil {
 
@@ -34,9 +29,6 @@ public class VNPayUtil {
     @Value("${vnp.returnUrl}")
     private String returnUrl;
 
-    // ================================================================
-    // Build Payment URL
-    // ================================================================
 
     public String buildPaymentUrl(long amount, String orderId, String ipAddr) {
         Map<String, String> params = new TreeMap<>(); // TreeMap tự sort theo key
@@ -65,7 +57,6 @@ public class VNPayUtil {
         System.out.println("vnp_ExpireDate = " + now.plusMinutes(15).format(fmt));
         System.out.println("Server UTC time = " + ZonedDateTime.now(ZoneId.of("UTC")).format(fmt));
         System.out.println("Vietnam time    = " + now.format(fmt));
-        // Build raw hash string (params đã sort vì dùng TreeMap)
         String rawHash = buildRawString(params);
         String secureHash = hmacSHA512(hashSecret, rawHash);
         System.out.println("===== VNPAY DEBUG =====");
@@ -73,7 +64,6 @@ public class VNPayUtil {
         System.out.println("SECRET LENGTH = " + (hashSecret == null ? 0 : hashSecret.length()));
         System.out.println("RETURN_URL = [" + returnUrl + "]");
         System.out.println("=======================");
-        // Build query string (có encode)
         String queryString = buildQueryString(params);
         System.out.println("RAW HASH = " + rawHash);
         System.out.println("HASH = " + secureHash);
@@ -83,16 +73,11 @@ public class VNPayUtil {
                 + "&vnp_SecureHash=" + secureHash;
     }
 
-    // ================================================================
-    // Verify Return URL signature
-    // ================================================================
-
     public boolean verifyReturnUrl(Map<String, String> params) {
         String receivedHash = params.get("vnp_SecureHash");
         if (receivedHash == null)
             return false;
 
-        // Tạo map mới bỏ hash fields
         Map<String, String> checkParams = new TreeMap<>(params);
         checkParams.remove("vnp_SecureHash");
         checkParams.remove("vnp_SecureHashType");
@@ -103,14 +88,7 @@ public class VNPayUtil {
         return calculatedHash.equalsIgnoreCase(receivedHash);
     }
 
-    // ================================================================
-    // Private helpers
-    // ================================================================
-
-    /**
-     * Build raw string để sign: key=URLEncode(value)&key=URLEncode(value) (đã sort)
-     * VNPay yêu cầu hash tính trên chuỗi có URL-encoded values
-     */
+  
     private String buildRawString(Map<String, String> params) {
         StringBuilder sb = new StringBuilder();
 
@@ -130,9 +108,7 @@ public class VNPayUtil {
         return sb.toString();
     }
 
-    /**
-     * Build query string để append vào URL (có URL encode value)
-     */
+
     private String buildQueryString(Map<String, String> params) {
         StringBuilder sb = new StringBuilder();
 
@@ -151,9 +127,7 @@ public class VNPayUtil {
         return sb.toString();
     }
 
-    /**
-     * HMAC SHA512
-     */
+   
     private String hmacSHA512(String key, String data) {
         try {
             Mac mac = Mac.getInstance("HmacSHA512");

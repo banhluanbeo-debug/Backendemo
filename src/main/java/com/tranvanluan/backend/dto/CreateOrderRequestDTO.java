@@ -7,14 +7,14 @@ import java.util.List;
 public class CreateOrderRequestDTO {
     private Long userId;
     private Long showtimeId;
-    private List<Long> seatIds;        // danh sách ghế đã chọn
-    private String paymentMethod;      // CASH | VNPAY
+    private List<Long> seatIds;        
+    private String paymentMethod;      
 
     // Food & Voucher
-    private List<FoodItemDTO> foodItems; // nullable nếu không chọn đồ ăn
-    private String voucherCode;          // nullable nếu không dùng voucher
-    private Double foodTotal;            // tổng tiền đồ ăn (trước giảm)
-    private Double discountAmount;       // số tiền voucher giảm
+    private List<FoodItemDTO> foodItems; 
+    private String voucherCode;          
+    private Double foodTotal;            
+    private Double discountAmount;       
 
     @Data
     public static class FoodItemDTO {

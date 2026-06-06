@@ -33,7 +33,6 @@ public class RewardServiceImpl implements RewardService {
 
         List<OrderHistory> histories = orderHistoryRepository.findByUserId(userId);
 
-        // Chỉ đếm các đơn PAID
         long totalTickets = histories.stream()
                 .filter(h -> "PAID".equalsIgnoreCase(h.getStatus()))
                 .mapToLong(h -> countSeats(h.getSeatCodes()))
@@ -45,7 +44,6 @@ public class RewardServiceImpl implements RewardService {
         int currentLevel = user.getRewardLevel() == null ? 0 : user.getRewardLevel();
         boolean updated = false;
 
-        // Mốc 10 vé → FOOD50 (check trước để không bỏ sót nếu vừa nhảy từ 0 lên 10)
         if (totalTickets >= 10 && currentLevel < 10) {
             voucherService.createVoucher(userId, "FOOD50", 50000.0);
             user.setRewardLevel(10);
@@ -54,7 +52,6 @@ public class RewardServiceImpl implements RewardService {
             log.info("RewardService: Tặng FOOD50 cho user={}", userId);
         }
 
-        // Mốc 5 vé → FOOD30
         if (totalTickets >= 5 && currentLevel < 5) {
             voucherService.createVoucher(userId, "FOOD30", 30000.0);
             user.setRewardLevel(5);
@@ -67,9 +64,7 @@ public class RewardServiceImpl implements RewardService {
         }
     }
 
-    /**
-     * Đếm số ghế từ chuỗi "A1, A2, B3" → 3
-     */
+    
     private long countSeats(String seatCodes) {
         if (seatCodes == null || seatCodes.trim().isEmpty()) return 0;
         return seatCodes.split(",").length;

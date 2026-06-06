@@ -12,7 +12,7 @@ public class OrderDetailDTO {
     private Double price;
     private Integer quantity;
     private String seatCode;
-    private String seatType; // thêm
+    private String seatType; 
 
     private ShowtimeDTO showtime;
 }

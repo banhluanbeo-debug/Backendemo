@@ -44,7 +44,6 @@ public class StatisticsService {
     private List<RawStat> getAllPaidStats() {
         List<RawStat> stats = new ArrayList<>();
 
-        // 1. Lấy từ Order hiện tại (chưa chiếu xong)
         List<Order> activeOrders = orderRepository.findByStatus("PAID");
         for (Order o : activeOrders) {
             if (o.getOrderDetails() == null || o.getOrderDetails().isEmpty())
@@ -61,20 +60,23 @@ public class StatisticsService {
                     o.getTotalAmount()));
         }
 
-        // 2. Lấy từ OrderHistory (đã chiếu xong)
         List<OrderHistory> historyOrders = orderHistoryRepository.findByStatus("PAID");
         for (OrderHistory h : historyOrders) {
             Showtime st = showtimeRepository.findById(h.getShowtimeId()).orElse(null);
-            if (st == null)
-                continue; // Bỏ qua nếu suất chiếu bị xoá (thực tế ít khi xảy ra)
+            
+            Long movieId = st != null ? st.getMovie().getId() : (long) h.getMovieTitle().hashCode();
+            String title = st != null ? st.getMovie().getTitle() : h.getMovieTitle();
+            LocalDate sDate = st != null ? st.getShowDate() : h.getShowDate();
+            LocalTime sTime = st != null ? st.getShowTime() : h.getShowTime();
+            String rName = st != null ? st.getRoom().getName() : h.getRoomName();
 
             int tickets = h.getSeatCodes() != null ? h.getSeatCodes().split(",").length : 0;
             stats.add(new RawStat(
-                    st.getMovie().getId(),
-                    st.getMovie().getTitle(),
-                    st.getShowDate(),
-                    st.getShowTime(),
-                    st.getRoom().getName(),
+                    movieId,
+                    title,
+                    sDate,
+                    sTime,
+                    rName,
                     tickets,
                     h.getTotalAmount()));
         }
@@ -82,7 +84,6 @@ public class StatisticsService {
         return stats;
     }
 
-    // Màn hình 1: Danh sách phim theo tháng
     public List<MovieStatDTO> getMonthlyStatsByMovie(int month, int year) {
         return getAllPaidStats().stream()
                 .filter(s -> s.getShowDate().getMonthValue() == month && s.getShowDate().getYear() == year)
@@ -100,7 +101,6 @@ public class StatisticsService {
                 .toList();
     }
 
-    // Màn hình 2: Bấm vào phim -> Chi tiết từng ngày trong tháng
     public List<DailyStatDTO> getDailyStatsForMovie(Long movieId, int month, int year) {
         return getAllPaidStats().stream()
                 .filter(s -> s.getMovieId().equals(movieId)
@@ -114,11 +114,10 @@ public class StatisticsService {
                             return new DailyStatDTO(list.get(0).getShowDate(), totalTickets, totalAmount);
                         })))
                 .values().stream()
-                .sorted((a, b) -> a.getShowDate().compareTo(b.getShowDate())) // Sắp xếp tăng dần theo ngày
+                .sorted((a, b) -> a.getShowDate().compareTo(b.getShowDate())) 
                 .toList();
     }
 
-    // Màn hình 3: Bấm vào ngày -> Chi tiết từng suất chiếu
     public List<ShowtimeStatDTO> getShowtimeStatsForMovieAndDate(Long movieId, LocalDate date) {
         return getAllPaidStats().stream()
                 .filter(s -> s.getMovieId().equals(movieId) && s.getShowDate().equals(date))

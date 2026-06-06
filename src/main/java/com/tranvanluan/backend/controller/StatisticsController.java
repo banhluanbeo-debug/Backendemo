@@ -18,7 +18,6 @@ public class StatisticsController {
 
     private final StatisticsService statisticsService;
 
-    // 1. Lấy danh sách phim theo tháng
     @GetMapping("/monthly")
     public List<MovieStatDTO> getMonthlyStats(
             @RequestParam int month,
@@ -26,7 +25,6 @@ public class StatisticsController {
         return statisticsService.getMonthlyStatsByMovie(month, year);
     }
 
-    // 2. Chi tiết từng ngày của 1 phim
     @GetMapping("/movie/{movieId}/daily")
     public List<DailyStatDTO> getDailyStats(
             @PathVariable Long movieId,
@@ -35,7 +33,6 @@ public class StatisticsController {
         return statisticsService.getDailyStatsForMovie(movieId, month, year);
     }
 
-    // 3. Chi tiết từng suất chiếu của 1 phim trong 1 ngày
     @GetMapping("/movie/{movieId}/showtimes")
     public List<ShowtimeStatDTO> getShowtimeStats(
             @PathVariable Long movieId,
@@ -43,7 +40,6 @@ public class StatisticsController {
         return statisticsService.getShowtimeStatsForMovieAndDate(movieId, date);
     }
 
-    // 4. Lịch sử đặt vé của User
     @GetMapping("/user/{userId}/history")
     public List<com.tranvanluan.backend.dto.statistics.UserHistoryDTO> getUserHistory(@PathVariable Long userId) {
         return statisticsService.getUserHistory(userId);

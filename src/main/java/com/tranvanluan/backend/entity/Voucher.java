@@ -18,17 +18,17 @@ public class Voucher {
     private Long id;
 
     @Column(unique = true, nullable = false)
-    private String code; // vd: FOOD30-X82KD
+    private String code;
 
-    private Double discountAmount; // số tiền giảm (vd: 30000, 50000)
+    private Double discountAmount;
 
-    private String type; // FOOD30 | FOOD50
+    private String type; 
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private VoucherStatus status = VoucherStatus.UNUSED;
 
-    private Long userId; // gắn với user cụ thể
+    private Long userId; 
 
     private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime usedAt;

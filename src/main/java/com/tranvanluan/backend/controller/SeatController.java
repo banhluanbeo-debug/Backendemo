@@ -48,8 +48,7 @@ public class SeatController {
         return showtimeSeatService.getByShowtimeId(showtimeId);
     }
 
-    // Trả về tất cả ghế không thể chọn (BOOKED + HOLD còn hiệu lực)
-    // Frontend dùng endpoint này để render ghế bị khóa
+   
     @GetMapping("/unavailable")
     public List<Long> getUnavailableSeatIds(@RequestParam Long showtimeId) {
         return showtimeSeatService.getBookedSeatIds(showtimeId);

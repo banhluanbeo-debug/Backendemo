@@ -32,7 +32,6 @@ public class ShowtimeServiceImpl implements ShowtimeService {
     @Transactional
     public void onApplicationReady(org.springframework.context.event.ContextRefreshedEvent event) {
         try {
-            // 1. Tự sinh ghế cho các Room chưa có ghế (ví dụ Room 2 đang có 0 ghế)
             List<Room> rooms = roomRepository.findAll();
             for (Room room : rooms) {
                 List<Seat> roomSeats = seatRepository.findByRoomId(room.getId());
@@ -56,7 +55,6 @@ public class ShowtimeServiceImpl implements ShowtimeService {
                 }
             }
 
-            // 2. Tự sinh ShowtimeSeat cho các showtime bị thiếu
             List<Showtime> showtimes = showtimeRepository.findAll();
             int count = 0;
             for (Showtime st : showtimes) {
@@ -106,10 +104,8 @@ public class ShowtimeServiceImpl implements ShowtimeService {
     public Showtime create(Showtime showtime) {
         validateShowtime(showtime);
 
-        // Lưu showtime trước
         Showtime saved = showtimeRepository.save(showtime);
 
-        // Lấy toàn bộ ghế của phòng → tạo showtime_seats
         List<Seat> seats = seatRepository.findByRoomId(saved.getRoom().getId());
 
         List<ShowtimeSeat> showtimeSeats = seats.stream()
@@ -179,7 +175,6 @@ public class ShowtimeServiceImpl implements ShowtimeService {
                     showtimeSeatRepository.saveAll(showtimeSeats);
                     created++;
                 } catch (IllegalArgumentException e) {
-                    // Không hợp lệ (trùng, sai giờ...) -> bỏ qua
                     skipped++;
                 }
             }
@@ -198,7 +193,7 @@ public class ShowtimeServiceImpl implements ShowtimeService {
         Showtime existing = showtimeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy suất chiếu với id: " + id));
 
-        showtime.setId(id); // Set id to avoid self-overlap check
+        showtime.setId(id);     
         validateShowtime(showtime);
 
         boolean roomChanged = !existing.getRoom().getId().equals(showtime.getRoom().getId());
@@ -225,11 +220,9 @@ public class ShowtimeServiceImpl implements ShowtimeService {
         List<ShowtimeSeat> existingSeats = showtimeSeatRepository.findByShowtimeId(id);
         if (existingSeats.isEmpty() || roomChanged) {
             if (roomChanged && !existingSeats.isEmpty()) {
-                // Xóa toàn bộ ghế cũ của suất chiếu này
                 showtimeSeatRepository.deleteAll(existingSeats);
             }
 
-            // Tạo toàn bộ ghế mới thuộc về phòng mới/hiện tại
             List<Seat> seats = seatRepository.findByRoomId(saved.getRoom().getId());
             List<ShowtimeSeat> showtimeSeats = seats.stream()
                     .map(seat -> ShowtimeSeat.builder()
@@ -315,7 +308,6 @@ public class ShowtimeServiceImpl implements ShowtimeService {
             int existingDuration = existing.getMovie().getDuration() != null ? existing.getMovie().getDuration() : 120;
             LocalDateTime existingEnd = existingStart.plusMinutes(existingDuration);
 
-            // Giao nhau khi: start1 < end2 VÀ end1 > start2
             if (showtimeStart.isBefore(existingEnd) && showtimeEnd.isAfter(existingStart)) {
                 throw new IllegalArgumentException(String.format("Phòng này đã có suất chiếu phim '%s' (từ %s đến %s)!", existing.getMovie().getTitle(), existingStart.toLocalTime(), existingEnd.toLocalTime()));
             }

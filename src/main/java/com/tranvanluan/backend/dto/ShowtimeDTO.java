@@ -14,8 +14,8 @@ public class ShowtimeDTO {
     private LocalTime showTime;
     private Double price;
 
-    private Long movieId; // <- thêm
-    private String movieTitle; // <- thêm
-    private Long roomId; // <- thêm
-    private String roomName; // <- thêm
+    private Long movieId; 
+    private String movieTitle; 
+    private Long roomId; 
+    private String roomName; 
 }

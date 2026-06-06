@@ -36,9 +36,9 @@
 
         private String paymentMethod;
 
-        private Double foodTotal = 0.0;      // tổng tiền đồ ăn
-        private Double discountAmount = 0.0; // số tiền voucher giảm
-        private String voucherCode;           // mã voucher đã dùng (nullable)
+        private Double foodTotal = 0.0;      
+        private Double discountAmount = 0.0; 
+        private String voucherCode;          
 
         // Safe equals/hashCode — only use ID
         @Override

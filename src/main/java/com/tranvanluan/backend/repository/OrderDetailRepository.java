@@ -8,10 +8,8 @@ import java.util.List;
 @Repository
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> {
 
-    // lấy tất cả order details của 1 suất chiếu (qua showtimeSeat)
     List<OrderDetail> findByShowtimeSeat_ShowtimeId(Long showtimeId);
 
-    // check ghế đã đặt chưa trong suất đó (qua showtimeSeat)
     boolean existsByShowtimeSeat_Id(Long showtimeSeatId);
 
     boolean existsByShowtimeSeat_SeatId(Long seatId);

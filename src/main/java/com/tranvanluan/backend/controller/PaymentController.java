@@ -26,10 +26,7 @@ public class PaymentController {
     @Value("${frontend.url}")
     private String frontendUrl;
 
-    // ================================================================
-    // GET /api/payment/payment-web?amount=xxx&orderId=xxx
-    // Frontend gọi để lấy VNPay URL rồi redirect
-    // ================================================================
+    
     @GetMapping("/payment-web")
     public ResponseEntity<Map<String, String>> createPaymentUrl(
             @RequestParam long amount,
@@ -41,7 +38,6 @@ public class PaymentController {
                     .body(Map.of("message", "Thiếu dữ liệu: amount hoặc orderId"));
         }
 
-        // Lấy IP thật của user (hỗ trợ behind proxy)
         String ipAddr = getClientIp(request);
 
         String payUrl = paymentService.createVNPayUrl(amount, orderId, ipAddr);
@@ -51,10 +47,7 @@ public class PaymentController {
         return ResponseEntity.ok(response);
     }
 
-    // ================================================================
-    // GET /api/payment/vnpay-return-web
-    // VNPay callback sau khi thanh toán, redirect về frontend
-    // ================================================================
+    
     @GetMapping("/vnpay-return-web")
     public void handleVNPayReturn(
             @RequestParam Map<String, String> params,
@@ -65,23 +58,19 @@ public class PaymentController {
 
         System.out.println("🌐 VNPay callback — orderId=" + orderId + ", code=" + responseCode);
 
-        // ❌ User huỷ thanh toán (code 24)
         if ("24".equals(responseCode)) {
             response.sendRedirect(frontendUrl);
             return;
         }
 
-        // Verify chữ ký
         boolean isValid = paymentService.verifyVNPayReturn(params);
 
-        // ❌ Signature sai hoặc payment fail
         if (!isValid || !"00".equals(responseCode)) {
             System.err.println("❌ VNPay verify failed — orderId=" + orderId + ", code=" + responseCode);
             response.sendRedirect(frontendUrl + "/payment-fail");
             return;
         }
 
-        // ✅ Thanh toán thành công — confirm order
         try {
             long orderIdLong = Long.parseLong(orderId);
             orderService.confirmOrder(orderIdLong, null); // null vì VNPay callback không có userId
@@ -89,18 +78,11 @@ public class PaymentController {
             response.sendRedirect(frontendUrl + "/payment-success");
         } catch (Exception e) {
             System.err.println("❌ Confirm order failed: " + e.getMessage());
-            // Vẫn redirect success vì VNPay đã thu tiền
             response.sendRedirect(frontendUrl + "/payment-success");
         }
     }
 
-    // ================================================================
-    // Private helpers
-    // ================================================================
-
-    /**
-     * Lấy IP thật của client, hỗ trợ behind reverse proxy / load balancer
-     */
+    
     private String getClientIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");
         if (ip == null || ip.isBlank() || "unknown".equalsIgnoreCase(ip)) {
