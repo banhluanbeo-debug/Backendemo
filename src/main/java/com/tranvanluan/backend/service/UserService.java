@@ -25,4 +25,9 @@ public interface UserService {
     void sendPasswordResetOtp(String email);
 
     void resetPasswordWithOtp(String email, String otp, String newPassword);
+
+    // --- Phone-based password reset ---
+    String verifyPhoneForReset(String email); // Trả về hint SĐT ẩn (vd: "090****678")
+
+    void resetPasswordWithPhone(String email, String phone, String newPassword);
 }

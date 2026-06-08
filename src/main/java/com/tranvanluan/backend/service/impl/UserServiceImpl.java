@@ -220,4 +220,43 @@
 
             otpRepository.deleteByEmail(email);
         }
+
+        // ========== Phone-based reset ==========
+
+        @Override
+        public String verifyPhoneForReset(String email) {
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("Email chưa được đăng ký trong hệ thống."));
+
+            if (user.getProvider() == AuthProvider.GOOGLE) {
+                throw new RuntimeException("Tài khoản này được đăng nhập bằng Google. Vui lòng sử dụng đăng nhập Google.");
+            }
+
+            String phone = user.getPhone();
+            if (phone == null || phone.trim().isEmpty()) {
+                throw new RuntimeException("Tài khoản này chưa liên kết số điện thoại. Vui lòng liên hệ admin để được hỗ trợ.");
+            }
+
+            // Build masked phone hint: 090****678
+            String masked;
+            if (phone.length() >= 6) {
+                masked = phone.substring(0, 3) + "****" + phone.substring(phone.length() - 3);
+            } else {
+                masked = phone.substring(0, 1) + "****";
+            }
+            return masked;
+        }
+
+        @Override
+        public void resetPasswordWithPhone(String email, String phone, String newPassword) {
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng."));
+
+            if (user.getPhone() == null || !user.getPhone().trim().equals(phone.trim())) {
+                throw new RuntimeException("Số điện thoại không khớp. Vui lòng thử lại.");
+            }
+
+            user.setPassword(passwordEncoder.encode(newPassword));
+            userRepository.save(user);
+        }
     }

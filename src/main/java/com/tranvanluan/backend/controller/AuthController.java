@@ -62,4 +62,30 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
+
+    // ===== Phone-based password reset =====
+
+    @PostMapping("/forgot-password/verify-phone")
+    public ResponseEntity<?> verifyPhoneForReset(@RequestBody Map<String, String> request) {
+        try {
+            String maskedPhone = userService.verifyPhoneForReset(request.get("email"));
+            return ResponseEntity.ok(Map.of("maskedPhone", maskedPhone));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/forgot-password/reset-by-phone")
+    public ResponseEntity<?> resetPasswordByPhone(@RequestBody Map<String, String> request) {
+        try {
+            userService.resetPasswordWithPhone(
+                    request.get("email"),
+                    request.get("phone"),
+                    request.get("newPassword")
+            );
+            return ResponseEntity.ok(Map.of("message", "Đổi mật khẩu thành công."));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
 }
