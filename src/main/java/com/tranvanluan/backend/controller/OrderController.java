@@ -4,6 +4,7 @@ import com.tranvanluan.backend.dto.CreateOrderRequestDTO;
 import com.tranvanluan.backend.dto.OrderResponseDTO;
 import com.tranvanluan.backend.entity.Order;
 import com.tranvanluan.backend.service.OrderService;
+import com.tranvanluan.backend.service.VietQrService;
 import com.tranvanluan.backend.service.mapper.OrderMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,7 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService orderService;
+    private final VietQrService vietQrService;
 
     @GetMapping
     public List<OrderResponseDTO> getAllOrders() {
@@ -29,6 +31,12 @@ public class OrderController {
     public OrderResponseDTO getOrderById(@PathVariable Long id) {
         Order order = orderService.getById(id);
         return OrderMapper.toDTO(order);
+    }
+
+    @GetMapping("/{id}/vietqr")
+    public String getQr(@PathVariable Long id) {
+        Order order = orderService.getById(id);
+        return vietQrService.generateQr(order);
     }
 
     @PostMapping
