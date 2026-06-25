@@ -61,4 +61,13 @@ public class OrderController {
         Order order = orderService.confirmOrder(id, userId);
         return OrderMapper.toDTO(order);
     }
+
+    @GetMapping("/user/{userId}/pending-payment")
+    public org.springframework.http.ResponseEntity<OrderResponseDTO> getPendingPayment(@PathVariable Long userId) {
+        OrderResponseDTO order = orderService.getPendingPaymentOrder(userId);
+        if (order == null) {
+            return org.springframework.http.ResponseEntity.noContent().build();
+        }
+        return org.springframework.http.ResponseEntity.ok(order);
+    }
 }

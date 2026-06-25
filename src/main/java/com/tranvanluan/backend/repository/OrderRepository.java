@@ -11,6 +11,8 @@
     public interface OrderRepository extends JpaRepository<Order, Long> {
         List<Order> findByUserId(Long userId);
 
+        java.util.Optional<Order> findTopByUserIdAndStatusAndExpiredAtAfter(Long userId, String status, java.time.LocalDateTime now);
+
         List<Order> findByStatus(String status);
 
         @Query("SELECT DISTINCT o FROM Order o JOIN o.orderDetails od JOIN od.showtimeSeat ss WHERE ss.showtime.id = :showtimeId")

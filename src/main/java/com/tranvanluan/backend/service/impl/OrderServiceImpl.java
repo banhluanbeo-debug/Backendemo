@@ -95,6 +95,13 @@ public class OrderServiceImpl implements OrderService {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        // Kiểm tra xem user có đơn hàng PENDING_PAYMENT nào chưa hết hạn không
+        java.util.Optional<Order> pendingOpt = orderRepository.findTopByUserIdAndStatusAndExpiredAtAfter(
+                user.getId(), "PENDING_PAYMENT", LocalDateTime.now());
+        if (pendingOpt.isPresent()) {
+            throw new RuntimeException("Bạn đang có một hóa đơn chưa thanh toán. Vui lòng hoàn tất hoặc chờ hóa đơn hết hạn để đặt vé mới.");
+        }
+
         Showtime showtime = showtimeRepository.findById(request.getShowtimeId())
                 .orElseThrow(() -> new RuntimeException("Showtime not found"));
 
@@ -103,7 +110,7 @@ public class OrderServiceImpl implements OrderService {
 
         Order order = Order.builder()
                 .user(user)
-                .status("PENDING")
+                .status("PENDING_PAYMENT")
                 .totalAmount(0.0)
                 .orderDetails(new ArrayList<>())
                 .paymentMethod(request.getPaymentMethod())
@@ -112,6 +119,7 @@ public class OrderServiceImpl implements OrderService {
                 .voucherCode(request.getVoucherCode())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
+                .expiredAt(LocalDateTime.now().plusMinutes(5))
                 .build();
 
         List<OrderDetail> details = new ArrayList<>();
@@ -132,7 +140,7 @@ public class OrderServiceImpl implements OrderService {
             }
 
             ss.setStatus(SeatStatus.HOLD);
-            ss.setHoldUntil(LocalDateTime.now().plusMinutes(2));
+            ss.setHoldUntil(LocalDateTime.now().plusMinutes(5));
             ss.setUser(user);
             showtimeSeatRepository.save(ss);
 
@@ -168,7 +176,7 @@ public class OrderServiceImpl implements OrderService {
             throw new RuntimeException("Không có quyền xác nhận đơn hàng này");
         }
 
-        if (!"PENDING".equals(order.getStatus())) {
+        if (!"PENDING".equals(order.getStatus()) && !"PENDING_PAYMENT".equals(order.getStatus())) {
             throw new RuntimeException("Đơn hàng không ở trạng thái chờ thanh toán");
         }
 
@@ -201,5 +209,16 @@ public class OrderServiceImpl implements OrderService {
         }
 
         return saved;
+    }
+
+    @Override
+    public com.tranvanluan.backend.dto.OrderResponseDTO getPendingPaymentOrder(Long userId) {
+        java.util.Optional<Order> orderOpt = orderRepository.findTopByUserIdAndStatusAndExpiredAtAfter(
+                userId, "PENDING_PAYMENT", LocalDateTime.now());
+        
+        if (orderOpt.isPresent()) {
+            return com.tranvanluan.backend.service.mapper.OrderMapper.toDTO(orderOpt.get());
+        }
+        return null;
     }
 }

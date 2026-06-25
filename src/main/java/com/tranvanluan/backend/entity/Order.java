@@ -33,6 +33,7 @@
 
         private LocalDateTime createdAt = LocalDateTime.now();
         private LocalDateTime updatedAt = LocalDateTime.now();
+        private LocalDateTime expiredAt;
 
         private String paymentMethod;
 

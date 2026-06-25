@@ -53,10 +53,15 @@ public class PaymentController {
             @RequestParam Map<String, String> params,
             jakarta.servlet.http.HttpServletResponse response) throws Exception {
 
-        String orderId = params.get("vnp_TxnRef");
+        String rawOrderId = params.get("vnp_TxnRef");
         String responseCode = params.get("vnp_ResponseCode");
 
-        System.out.println("🌐 VNPay callback — orderId=" + orderId + ", code=" + responseCode);
+        String orderId = rawOrderId;
+        if (orderId != null && orderId.contains("_")) {
+            orderId = orderId.split("_")[0];
+        }
+
+        System.out.println("🌐 VNPay callback — orderId=" + orderId + " (raw=" + rawOrderId + "), code=" + responseCode);
 
         if ("24".equals(responseCode)) {
             response.sendRedirect(frontendUrl);

@@ -26,7 +26,8 @@ public class PaymentService {
      * @return VNPay payment URL để redirect
      */
     public String createVNPayUrl(long amount, String orderId, String ipAddr) {
-        return vnPayUtil.buildPaymentUrl(amount, orderId, ipAddr);
+        String txnRef = orderId + "_" + System.currentTimeMillis();
+        return vnPayUtil.buildPaymentUrl(amount, txnRef, ipAddr);
     }
 
     /**

@@ -28,15 +28,16 @@ public class HoldSeatScheduler {
         if (expired.isEmpty())
             return;
 
-        java.util.Set<Long> orderIdsToDelete = new java.util.HashSet<>();
+        java.util.Set<Order> ordersToExpire = new java.util.HashSet<>();
 
         expired.forEach(ss -> {
             if (ss.getOrderDetail() != null) {
                 Order order = ss.getOrderDetail().getOrder();
-                if ("PENDING".equals(order.getStatus())) {
-                    orderIdsToDelete.add(order.getId());
+                if ("PENDING".equals(order.getStatus()) || "PENDING_PAYMENT".equals(order.getStatus())) {
+                    order.setStatus("EXPIRED");
+                    ordersToExpire.add(order);
                 }
-                ss.setOrderDetail(null);
+                // Do not remove order detail from seat to keep history
             }
 
             ss.setStatus(SeatStatus.AVAILABLE);
@@ -46,11 +47,9 @@ public class HoldSeatScheduler {
 
         showtimeSeatRepository.saveAll(expired);
         
-        if (!orderIdsToDelete.isEmpty()) {
-            java.util.List<Long> ids = new java.util.ArrayList<>(orderIdsToDelete);
-            orderDetailRepository.deleteByOrderIdIn(ids);
-            orderRepository.deleteByIdIn(ids);
+        if (!ordersToExpire.isEmpty()) {
+            orderRepository.saveAll(ordersToExpire);
         }
-        log.info("Released {} expired held seat(s) and deleted {} pending order(s)", expired.size(), orderIdsToDelete.size());
+        log.info("Released {} expired held seat(s) and expired {} pending order(s)", expired.size(), ordersToExpire.size());
     }
 }

@@ -20,4 +20,6 @@ public interface OrderService {
     Order createOrder(CreateOrderRequestDTO request);
 
     Order confirmOrder(Long orderId, Long userId);
+
+    com.tranvanluan.backend.dto.OrderResponseDTO getPendingPaymentOrder(Long userId);
 }
