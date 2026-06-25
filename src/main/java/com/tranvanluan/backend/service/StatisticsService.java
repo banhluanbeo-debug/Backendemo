@@ -39,6 +39,8 @@ public class StatisticsService {
         private String roomName;
         private int ticketCount;
         private double totalAmount;
+        private double foodTotal;
+        private double discountAmount;
     }
 
     private List<RawStat> getAllPaidStats() {
@@ -57,7 +59,9 @@ public class StatisticsService {
                     st.getShowTime(),
                     st.getRoom().getName(),
                     o.getOrderDetails().size(),
-                    o.getTotalAmount()));
+                    o.getTotalAmount(),
+                    o.getFoodTotal() != null ? o.getFoodTotal() : 0.0,
+                    o.getDiscountAmount() != null ? o.getDiscountAmount() : 0.0));
         }
 
         List<OrderHistory> historyOrders = orderHistoryRepository.findByStatus("PAID");
@@ -78,7 +82,9 @@ public class StatisticsService {
                     sTime,
                     rName,
                     tickets,
-                    h.getTotalAmount()));
+                    h.getTotalAmount(),
+                    h.getFoodTotal() != null ? h.getFoodTotal() : 0.0,
+                    h.getDiscountAmount() != null ? h.getDiscountAmount() : 0.0));
         }
 
         return stats;
@@ -93,8 +99,10 @@ public class StatisticsService {
                             RawStat first = list.get(0);
                             int totalTickets = list.stream().mapToInt(RawStat::getTicketCount).sum();
                             double totalAmount = list.stream().mapToDouble(RawStat::getTotalAmount).sum();
+                            double totalFood = list.stream().mapToDouble(RawStat::getFoodTotal).sum();
+                            double totalDiscount = list.stream().mapToDouble(RawStat::getDiscountAmount).sum();
                             return new MovieStatDTO(first.getMovieId(), first.getMovieTitle(), totalTickets,
-                                    totalAmount);
+                                    totalAmount, totalFood, totalDiscount);
                         })))
                 .values().stream()
                 .sorted((a, b) -> Double.compare(b.getTotalAmount(), a.getTotalAmount())) // Sắp xếp doanh thu giảm dần
@@ -111,7 +119,9 @@ public class StatisticsService {
                         Collectors.collectingAndThen(Collectors.toList(), list -> {
                             int totalTickets = list.stream().mapToInt(RawStat::getTicketCount).sum();
                             double totalAmount = list.stream().mapToDouble(RawStat::getTotalAmount).sum();
-                            return new DailyStatDTO(list.get(0).getShowDate(), totalTickets, totalAmount);
+                            double totalFood = list.stream().mapToDouble(RawStat::getFoodTotal).sum();
+                            double totalDiscount = list.stream().mapToDouble(RawStat::getDiscountAmount).sum();
+                            return new DailyStatDTO(list.get(0).getShowDate(), totalTickets, totalAmount, totalFood, totalDiscount);
                         })))
                 .values().stream()
                 .sorted((a, b) -> a.getShowDate().compareTo(b.getShowDate())) 
@@ -127,8 +137,10 @@ public class StatisticsService {
                             RawStat first = list.get(0);
                             int totalTickets = list.stream().mapToInt(RawStat::getTicketCount).sum();
                             double totalAmount = list.stream().mapToDouble(RawStat::getTotalAmount).sum();
+                            double totalFood = list.stream().mapToDouble(RawStat::getFoodTotal).sum();
+                            double totalDiscount = list.stream().mapToDouble(RawStat::getDiscountAmount).sum();
                             return new ShowtimeStatDTO(first.getShowTime(), first.getRoomName(), totalTickets,
-                                    totalAmount);
+                                    totalAmount, totalFood, totalDiscount);
                         })))
                 .values().stream()
                 .sorted((a, b) -> a.getShowTime().compareTo(b.getShowTime())) // Sắp xếp tăng dần theo giờ

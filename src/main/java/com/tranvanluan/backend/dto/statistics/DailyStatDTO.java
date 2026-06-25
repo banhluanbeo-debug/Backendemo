@@ -12,4 +12,6 @@ public class DailyStatDTO {
     private LocalDate showDate;
     private int totalTickets;
     private double totalAmount;
+    private double foodTotal;
+    private double discountAmount;
 }

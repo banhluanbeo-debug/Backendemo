@@ -12,4 +12,6 @@ public class MovieStatDTO {
     private String movieTitle;
     private int totalTickets;
     private double totalAmount;
+    private double foodTotal;
+    private double discountAmount;
 }

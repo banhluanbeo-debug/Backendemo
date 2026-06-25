@@ -13,4 +13,6 @@ public class ShowtimeStatDTO {
     private String roomName;
     private int totalTickets;
     private double totalAmount;
+    private double foodTotal;
+    private double discountAmount;
 }
