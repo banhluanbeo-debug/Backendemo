@@ -144,10 +144,18 @@ public class OrderServiceImpl implements OrderService {
             ss.setUser(user);
             showtimeSeatRepository.save(ss);
 
+            double seatPrice = 120000.0;
+            String seatType = ss.getSeat().getType();
+            if ("VIP".equalsIgnoreCase(seatType)) {
+                seatPrice = 150000.0;
+            } else if ("BED".equalsIgnoreCase(seatType)) {
+                seatPrice = 200000.0;
+            }
+
             OrderDetail detail = OrderDetail.builder()
                     .order(order)
                     .showtimeSeat(ss)
-                    .price(showtime.getPrice())
+                    .price(seatPrice)
                     .createdAt(LocalDateTime.now())
                     .updatedAt(LocalDateTime.now())
                     .build();
